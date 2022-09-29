@@ -41,7 +41,7 @@ const serializedContent = await serialize(content, {
     remarkPlugins: [remarkGfm],
     rehypePlugins: [
       /* other rehype plugins */
-      rehypeColorChips,
+      [rehypeColorChips, { customClassName: 'color-chip' }],
     ],
   },
 })
@@ -62,6 +62,23 @@ As an example the following styles can be applied to the color chip:
   border-radius: 9999px;
   border: 1px solid gray;
 ```
+
+You can change the class name by providing a custom value for the class attribute. Provide [`customClassName`](#options.customClassName) via options
+
+## API
+
+`rehype().use(rehypeColorChips, [options])`
+
+Adds a `<span>` tag with the color as `background-color` in the `style` attribute.
+
+### options
+
+#### options.customClassName
+
+Type: `string`
+Default: `'gfm-color-chip'`
+
+Adds a `class` to the added span element. Can be used to apply custom [styles](#styling) to the "color-chip".
 
 [rehype]: https://github.com/wooorm/rehype
 [supported color model]: https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#supported-color-models

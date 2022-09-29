@@ -3,7 +3,11 @@ import { toString } from 'hast-util-to-string'
 import { color } from 'd3-color'
 import type { Root } from 'hast'
 
-function plugin(options = { customClassName: 'gfm-color-chip' }) {
+interface Options {
+  customClassName: string
+}
+
+function plugin(options: Options = { customClassName: 'gfm-color-chip' }) {
   return (tree: Root) => {
     visit(tree, 'element', function (node) {
       if (node.tagName === 'code' && node.properties) {

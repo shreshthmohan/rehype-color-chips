@@ -1,5 +1,6 @@
 import type { Root } from 'hast';
-declare function plugin(options?: {
+interface Options {
     customClassName: string;
-}): (tree: Root) => void;
+}
+declare function plugin(options?: Options): (tree: Root) => void;
 export default plugin;
