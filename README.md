@@ -2,19 +2,17 @@
 
 [rehype] plugin to add a color chip with an inline code block containing a [supported color model].
 
-These don't work with `.md` files, but work inside issues. See https://github.com/shreshthmohan/rehype-color-chips/issues/1#issue-1391093265
 
-On GitHub issues:
 
-![image](https://user-images.githubusercontent.com/5955802/193078505-12afcdd8-446d-499d-910f-b2bf46a13105.png)
+## What does this plugin do?
 
-On a page with this plugin:
-
-![image](https://user-images.githubusercontent.com/5955802/193078786-df6e4d08-7d7f-41e8-89d1-661691e73a7c.png)
+Turns `#ef4591` to this: ![image](https://user-images.githubusercontent.com/5955802/193158286-4a0dcb59-0b98-4150-a8d7-af2b368759e7.png)
 
 Note that the 3-digit hex code doesn't work on GitHub, but works with this plugin.
 
 Appropriate [styles](#styling) will need to be applied for the the color "chip" to show up.
+
+These don't work with `.md` files, but work inside issues. See https://github.com/shreshthmohan/rehype-color-chips/issues/1#issue-1391093265
 
 ## Installation
 
