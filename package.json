@@ -1,0 +1,54 @@
+{
+  "name": "rehype-color-chips",
+  "version": "0.0.1",
+  "description": "A rehype plugin to add a color chip with an inline block with a valid color code",
+  "main": "./cjs/index.js",
+  "scripts": {
+    "build": "npm run tsc && npm run cjs && npm run rollup:es && npm run rollup:index",
+    "tsc": "tsc",
+    "cjs": "ascjs esm cjs",
+    "rollup:es": "rollup --config rollup/es.config.js && sed -i.bck 's/^var /self./' es.js && rm -rf es.js.bck",
+    "rollup:index": "rollup --config rollup/index.config.js",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "rehype",
+    "rehype-plugin",
+    "github-flavored-markdown",
+    "color-chips",
+    "mdx",
+    "jsx"
+  ],
+  "author": "Shreshth Mohan <sremog@gmail.com> (https://shreshth.dev)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shreshthmohan/rehype-color-chips/issues"
+  },
+  "homepage": "https://github.com/shreshthmohan/rehype-color-chips#readme",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^14.1.0",
+    "@types/d3-color": "^3.1.0",
+    "ascjs": "^5.0.1",
+    "eslint": "^8.24.0",
+    "hast": "^1.0.0",
+    "rollup": "^2.79.1",
+    "rollup-plugin-terser": "^7.0.2",
+    "typescript": "^4.8.4"
+  },
+  "module": "./esm/index.js",
+  "types": "./esm/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./esm/index.js",
+      "default": "./cjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "unpkg": "es.js",
+  "dependencies": {
+    "d3-color": "^3.1.0",
+    "hast-util-to-string": "^2.0.0",
+    "unist-util-visit": "^4.1.1"
+  }
+}

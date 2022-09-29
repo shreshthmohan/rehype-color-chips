@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES3",
+    "rootDir": "./src",
+    "declaration": true,
+    "module": "ES6",
+    "strict": true,
+    "outDir": "./esm",
+    "moduleResolution": "node"
+  },
+  "include": ["src/**/*"]
+}
