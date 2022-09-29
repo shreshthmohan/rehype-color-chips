@@ -2,7 +2,7 @@
 
 [rehype] plugin to add a color chip with an inline code block containing a [supported color model].
 
-Some examples: `#fa3467` `#ef3` `rgb(24, 213, 78)` `hsl(0, 100%, 50%)`
+Some examples: `#fa3467` `#ef3` `rgb(24, 213, 78)` `hsl(0, 100%, 50%)` These don't work with `.md` files, but works in side issues. See https://github.com/shreshthmohan/rehype-color-chips/issues/1#issue-1391093265
 
 Note that the 3-digit hex code doesn't work on GitHub, but works with this plugin.
 
