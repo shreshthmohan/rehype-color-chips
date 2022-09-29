@@ -14,14 +14,59 @@ On a page with this plugin:
 
 Note that the 3-digit hex code doesn't work on GitHub, but works with this plugin.
 
-Works with [next-mdx-remote].
+
 
 Appropriate [styles](#styling) will need to be applied for the the color "chip" to show up.
 
 ## Installation
 
+```
+npm install rehype-color-chips
+```
+
+```
+yarn add  rehype-color-chips
+```
+
+## Usage
+This plugin has been tested to work with [next-mdx-remote]. But should work with other mdx libraries too.
+
+[See it being used in a Next.js project here.] 
+
+```js
+import { serialize } from 'next-mdx-remote/serialize'
+import rehypeColorChips from 'rehype-color-chips'
+
+const serializedContent = await serialize(content, {
+    mdxOptions: {
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [
+        /* other rehype plugins */
+        rehypeColorChips,
+      ],
+    },
+  })
+```
+
+
 ## Styling
+
+By default, the plugin applies a `gfm-color-chip` class to the added element.
+
+As an example the following styles can be applied to the color chip:
+
+```css
+.gfm-color-chip
+  margin-left: 0.125rem;
+  display: inline-block;
+  height: 0.625rem;
+  width: 0.625rem;
+  border-radius: 9999px;
+  border: 1px solid gray;
+```
+
 
 [rehype]: https://github.com/wooorm/rehype
 [supported color model]: https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#supported-color-models
 [next-mdx-remote]: https://github.com/hashicorp/next-mdx-remote
+[See it being used in a Next.js project here.]: https://github.com/shreshthmohan/next-blog/blob/e7e29b70b40937593b4501ea5e495b01384b5235/utils/fetchIssues.ts#L83
