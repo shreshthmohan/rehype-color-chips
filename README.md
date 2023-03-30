@@ -28,7 +28,8 @@ yarn add  rehype-color-chips
 
 This plugin has been tested to work with [next-mdx-remote]. But should work with other mdx libraries too.
 
-[See it being used in a Next.js project here.] [Live on the website here.]
+[See it being used in a Next.js project here.]
+[Live on the website here.]
 
 ```js
 import { serialize } from 'next-mdx-remote/serialize'
@@ -82,4 +83,4 @@ Adds a `class` to the added span element. Can be used to apply custom [styles](#
 [supported color model]: https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#supported-color-models
 [next-mdx-remote]: https://github.com/hashicorp/next-mdx-remote
 [see it being used in a next.js project here.]: https://github.com/shreshthmohan/next-blog/blob/e7e29b70b40937593b4501ea5e495b01384b5235/utils/fetchIssues.ts#L83
-[live on the website here.] : https://shreshth.dev/blog/github-flavored-markdown-color-code-chips-test
+[live on the website here.]: https://shreshth.dev/blog/github-flavored-markdown-color-code-chips-test
