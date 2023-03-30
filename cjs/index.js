@@ -6,16 +6,16 @@ function plugin(options) {
     if (options === void 0) { options = { customClassName: 'gfm-color-chip' }; }
     return function (tree) {
         visit(tree, 'element', function (node) {
-            var _a;
             if (node.tagName === 'code' && node.properties) {
                 var value = toString(node);
-                if (color(value)) {
+                var parsedColor = color(value);
+                if (parsedColor) {
                     node.children.push({
                         type: 'element',
                         tagName: 'span',
                         properties: {
                             className: [options.customClassName],
-                            style: 'background-color: ' + ((_a = color(value)) === null || _a === void 0 ? void 0 : _a.formatHex()) + ';'
+                            style: 'background-color: ' + parsedColor.formatHex() + ';'
                         },
                         children: []
                     });

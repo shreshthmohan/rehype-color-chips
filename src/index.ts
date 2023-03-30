@@ -12,13 +12,14 @@ function plugin(options: Options = { customClassName: 'gfm-color-chip' }) {
     visit(tree, 'element', function (node) {
       if (node.tagName === 'code' && node.properties) {
         const value = toString(node)
-        if (color(value)) {
+        const parsedColor = color(value)
+        if (parsedColor) {
           node.children.push({
             type: 'element',
             tagName: 'span',
             properties: {
               className: [options.customClassName],
-              style: 'background-color: ' + color(value)?.formatHex() + ';',
+              style: 'background-color: ' + parsedColor.formatHex() + ';',
             },
             children: [],
           })
