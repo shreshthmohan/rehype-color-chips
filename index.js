@@ -4,29 +4,36 @@ var rehypeColorChips = (function (exports) {
   /**
    * @typedef {import('unist').Node} Node
    * @typedef {import('unist').Parent} Parent
-   *
-   * @typedef {string} Type
-   * @typedef {Object<string, unknown>} Props
-   *
-   * @typedef {null|undefined|Type|Props|TestFunctionAnything|Array.<Type|Props|TestFunctionAnything>} Test
    */
 
+  /**
+   * Generate an assertion from a test.
+   *
+   * Useful if you’re going to test many nodes, for example when creating a
+   * utility where something else passes a compatible test.
+   *
+   * The created function is a bit faster because it expects valid input only:
+   * a `node`, `index`, and `parent`.
+   *
+   * @param test
+   *   *   when nullish, checks if `node` is a `Node`.
+   *   *   when `string`, works like passing `(node) => node.type === test`.
+   *   *   when `function` checks if function passed the node is true.
+   *   *   when `object`, checks that all keys in test are in node, and that they have (strictly) equal values.
+   *   *   when `array`, checks if any one of the subtests pass.
+   * @returns
+   *   An assertion.
+   */
   const convert =
     /**
      * @type {(
-     *   (<T extends Node>(test: T['type']|Partial<T>|TestFunctionPredicate<T>) => AssertPredicate<T>) &
+     *   (<Kind extends Node>(test: PredicateTest<Kind>) => AssertPredicate<Kind>) &
      *   ((test?: Test) => AssertAnything)
      * )}
      */
     (
       /**
-       * Generate an assertion from a check.
        * @param {Test} [test]
-       * When nullish, checks if `node` is a `Node`.
-       * When `string`, works like passing `function (node) {return node.type === test}`.
-       * When `function` checks if function passed the node is true.
-       * When `object`, checks that all keys in test are in node, and that they have (strictly) equal values.
-       * When `array`, checks any one of the subtests pass.
        * @returns {AssertAnything}
        */
       function (test) {
@@ -49,12 +56,13 @@ var rehypeColorChips = (function (exports) {
         throw new Error('Expected function, string, or object as test')
       }
     );
+
   /**
-   * @param {Array.<Type|Props|TestFunctionAnything>} tests
+   * @param {Array<string | Props | TestFunctionAnything>} tests
    * @returns {AssertAnything}
    */
   function anyFactory(tests) {
-    /** @type {Array.<AssertAnything>} */
+    /** @type {Array<AssertAnything>} */
     const checks = [];
     let index = -1;
 
@@ -66,7 +74,7 @@ var rehypeColorChips = (function (exports) {
 
     /**
      * @this {unknown}
-     * @param {unknown[]} parameters
+     * @param {Array<unknown>} parameters
      * @returns {boolean}
      */
     function any(...parameters) {
@@ -81,8 +89,7 @@ var rehypeColorChips = (function (exports) {
   }
 
   /**
-   * Utility to assert each property in `test` is represented in `node`, and each
-   * values are strictly equal.
+   * Turn an object into a test for a node with a certain fields.
    *
    * @param {Props} check
    * @returns {AssertAnything}
@@ -108,10 +115,9 @@ var rehypeColorChips = (function (exports) {
   }
 
   /**
-   * Utility to convert a string into a function which checks a given node’s type
-   * for said string.
+   * Turn a string into a test for a node with a certain type.
    *
-   * @param {Type} check
+   * @param {string} check
    * @returns {AssertAnything}
    */
   function typeFactory(check) {
@@ -126,8 +132,8 @@ var rehypeColorChips = (function (exports) {
   }
 
   /**
-   * Utility to convert a string into a function which checks a given node’s type
-   * for said string.
+   * Turn a custom test into a test for a node that passes that test.
+   *
    * @param {TestFunctionAnything} check
    * @returns {AssertAnything}
    */
@@ -136,16 +142,21 @@ var rehypeColorChips = (function (exports) {
 
     /**
      * @this {unknown}
-     * @param {Array.<unknown>} parameters
+     * @param {unknown} node
+     * @param {Array<unknown>} parameters
      * @returns {boolean}
      */
-    function assertion(...parameters) {
-      // @ts-expect-error: spreading is fine.
-      return Boolean(check.call(this, ...parameters))
+    function assertion(node, ...parameters) {
+      return Boolean(
+        node &&
+          typeof node === 'object' &&
+          'type' in node &&
+          // @ts-expect-error: fine.
+          Boolean(check.call(this, node, ...parameters))
+      )
     }
   }
 
-  // Utility to return true.
   function ok() {
     return true
   }
@@ -162,51 +173,66 @@ var rehypeColorChips = (function (exports) {
    * @typedef {import('unist').Node} Node
    * @typedef {import('unist').Parent} Parent
    * @typedef {import('unist-util-is').Test} Test
-   * @typedef {import('./complex-types.js').Action} Action
-   * @typedef {import('./complex-types.js').Index} Index
-   * @typedef {import('./complex-types.js').ActionTuple} ActionTuple
-   * @typedef {import('./complex-types.js').VisitorResult} VisitorResult
-   * @typedef {import('./complex-types.js').Visitor} Visitor
    */
 
   /**
-   * Continue traversing as normal
+   * Continue traversing as normal.
    */
   const CONTINUE = true;
+
   /**
-   * Do not traverse this node’s children
-   */
-  const SKIP = 'skip';
-  /**
-   * Stop traversing immediately
+   * Stop traversing immediately.
    */
   const EXIT = false;
 
   /**
-   * Visit children of tree which pass test.
+   * Do not traverse this node’s children.
+   */
+  const SKIP = 'skip';
+
+  /**
+   * Visit nodes, with ancestral information.
+   *
+   * This algorithm performs *depth-first* *tree traversal* in *preorder*
+   * (**NLR**) or if `reverse` is given, in *reverse preorder* (**NRL**).
+   *
+   * You can choose for which nodes `visitor` is called by passing a `test`.
+   * For complex tests, you should test yourself in `visitor`, as it will be
+   * faster and will have improved type information.
+   *
+   * Walking the tree is an intensive task.
+   * Make use of the return values of the visitor when possible.
+   * Instead of walking a tree multiple times, walk it once, use `unist-util-is`
+   * to check if a node matches, and then perform different operations.
+   *
+   * You can change the tree.
+   * See `Visitor` for more info.
    *
    * @param tree
-   *   Tree to walk
-   * @param [test]
+   *   Tree to traverse.
+   * @param test
    *   `unist-util-is`-compatible test
    * @param visitor
-   *   Function called for nodes that pass `test`.
-   * @param [reverse=false]
-   *   Traverse in reverse preorder (NRL) instead of preorder (NLR) (default).
+   *   Handle each node.
+   * @param reverse
+   *   Traverse in reverse preorder (NRL) instead of the default preorder (NLR).
+   * @returns
+   *   Nothing.
    */
   const visitParents =
     /**
      * @type {(
-     *   (<Tree extends Node, Check extends Test>(tree: Tree, test: Check, visitor: import('./complex-types.js').BuildVisitor<Tree, Check>, reverse?: boolean) => void) &
-     *   (<Tree extends Node>(tree: Tree, visitor: import('./complex-types.js').BuildVisitor<Tree>, reverse?: boolean) => void)
+     *   (<Tree extends Node, Check extends Test>(tree: Tree, test: Check, visitor: BuildVisitor<Tree, Check>, reverse?: boolean | null | undefined) => void) &
+     *   (<Tree extends Node>(tree: Tree, visitor: BuildVisitor<Tree>, reverse?: boolean | null | undefined) => void)
      * )}
      */
     (
       /**
        * @param {Node} tree
        * @param {Test} test
-       * @param {import('./complex-types.js').Visitor<Node>} visitor
-       * @param {boolean} [reverse=false]
+       * @param {Visitor<Node>} visitor
+       * @param {boolean | null | undefined} [reverse]
+       * @returns {void}
        */
       function (tree, test, visitor, reverse) {
         if (typeof test === 'function' && typeof visitor !== 'function') {
@@ -219,33 +245,31 @@ var rehypeColorChips = (function (exports) {
         const is = convert(test);
         const step = reverse ? -1 : 1;
 
-        factory(tree, null, [])();
+        factory(tree, undefined, [])();
 
         /**
          * @param {Node} node
-         * @param {number?} index
+         * @param {number | undefined} index
          * @param {Array<Parent>} parents
          */
         function factory(node, index, parents) {
           /** @type {Record<string, unknown>} */
           // @ts-expect-error: hush
-          const value = typeof node === 'object' && node !== null ? node : {};
-          /** @type {string|undefined} */
-          let name;
+          const value = node && typeof node === 'object' ? node : {};
 
           if (typeof value.type === 'string') {
-            name =
+            const name =
+              // `hast`
               typeof value.tagName === 'string'
                 ? value.tagName
-                : typeof value.name === 'string'
+                : // `xast`
+                typeof value.name === 'string'
                 ? value.name
                 : undefined;
 
             Object.defineProperty(visit, 'name', {
               value:
-                'node (' +
-                color$1(value.type + (name ? '<' + name + '>' : '')) +
-                ')'
+                'node (' + color$1(node.type + (name ? '<' + name + '>' : '')) + ')'
             });
           }
 
@@ -297,8 +321,12 @@ var rehypeColorChips = (function (exports) {
     );
 
   /**
+   * Turn a return value into a clean result.
+   *
    * @param {VisitorResult} value
+   *   Valid return values from visitors.
    * @returns {ActionTuple}
+   *   Clean result.
    */
   function toResult(value) {
     if (Array.isArray(value)) {
@@ -317,34 +345,51 @@ var rehypeColorChips = (function (exports) {
    * @typedef {import('unist').Parent} Parent
    * @typedef {import('unist-util-is').Test} Test
    * @typedef {import('unist-util-visit-parents').VisitorResult} VisitorResult
-   * @typedef {import('./complex-types.js').Visitor} Visitor
    */
 
   /**
-   * Visit children of tree which pass test.
+   * Visit nodes.
+   *
+   * This algorithm performs *depth-first* *tree traversal* in *preorder*
+   * (**NLR**) or if `reverse` is given, in *reverse preorder* (**NRL**).
+   *
+   * You can choose for which nodes `visitor` is called by passing a `test`.
+   * For complex tests, you should test yourself in `visitor`, as it will be
+   * faster and will have improved type information.
+   *
+   * Walking the tree is an intensive task.
+   * Make use of the return values of the visitor when possible.
+   * Instead of walking a tree multiple times, walk it once, use `unist-util-is`
+   * to check if a node matches, and then perform different operations.
+   *
+   * You can change the tree.
+   * See `Visitor` for more info.
    *
    * @param tree
-   *   Tree to walk
-   * @param [test]
+   *   Tree to traverse.
+   * @param test
    *   `unist-util-is`-compatible test
    * @param visitor
-   *   Function called for nodes that pass `test`.
+   *   Handle each node.
    * @param reverse
-   *   Traverse in reverse preorder (NRL) instead of preorder (NLR) (default).
+   *   Traverse in reverse preorder (NRL) instead of the default preorder (NLR).
+   * @returns
+   *   Nothing.
    */
   const visit =
     /**
      * @type {(
-     *   (<Tree extends Node, Check extends Test>(tree: Tree, test: Check, visitor: import('./complex-types.js').BuildVisitor<Tree, Check>, reverse?: boolean) => void) &
-     *   (<Tree extends Node>(tree: Tree, visitor: import('./complex-types.js').BuildVisitor<Tree>, reverse?: boolean) => void)
+     *   (<Tree extends Node, Check extends Test>(tree: Tree, test: Check, visitor: BuildVisitor<Tree, Check>, reverse?: boolean | null | undefined) => void) &
+     *   (<Tree extends Node>(tree: Tree, visitor: BuildVisitor<Tree>, reverse?: boolean | null | undefined) => void)
      * )}
      */
     (
       /**
        * @param {Node} tree
        * @param {Test} test
-       * @param {import('./complex-types.js').Visitor} visitor
-       * @param {boolean} [reverse]
+       * @param {Visitor} visitor
+       * @param {boolean | null | undefined} [reverse]
+       * @returns {void}
        */
       function (tree, test, visitor, reverse) {
         if (typeof test === 'function' && typeof visitor !== 'function') {
