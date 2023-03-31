@@ -1,6 +1,6 @@
 {
   "name": "rehype-color-chips",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A rehype plugin to add a color chip with an inline block with a valid color code",
   "main": "./cjs/index.js",
   "scripts": {
