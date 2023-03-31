@@ -31,12 +31,13 @@
     "url": "https://github.com/shreshthmohan/rehype-color-chips.git"
   },
   "dependencies": {
-    "unist-util-visit": "^4.1.1",
     "d3-color": "^3.1.0",
-    "hast-util-to-string": "^2.0.0"
+    "hast-util-to-string": "^2.0.0",
+    "unist-util-visit": "^4.1.1"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^14.1.0",
+    "@rollup/plugin-terser": "^0.4.0",
     "@types/d3-color": "^3.1.0",
     "ascjs": "^5.0.1",
     "dedent": "^0.7.0",
@@ -44,7 +45,6 @@
     "hast": "^1.0.0",
     "rehype": "^12.0.1",
     "rollup": "^2.79.1",
-    "rollup-plugin-terser": "^7.0.2",
     "typescript": "^4.8.4",
     "uvu": "^0.5.6",
     "uvu-watch": "^1.0.11"
