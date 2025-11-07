@@ -99,4 +99,13 @@ test('Custom class for color chip', () => {
   assert.is(result, expected)
 })
 
+test('Location: before', () => {
+  const result = processHtml(dedent`<code>#ef3491</code>`, {
+    location: 'before',
+  })
+  const expected = dedent`
+  <span class="gfm-color-chip" style="background-color: #ef3491;"></span><code>#ef3491</code>`
+  assert.is(result, expected)
+})
+
 test.run()
