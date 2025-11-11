@@ -10,7 +10,8 @@
     "rollup:es": "rollup --config rollup/es.config.js && sed -i.bck 's/^var /self./' es.js && rm -rf es.js.bck",
     "rollup:index": "rollup --config rollup/index.config.js",
     "prepare": "npm run build",
-    "test": "uvu"
+    "test": "uvu",
+    "test:visual": "node visual-test.js"
   },
   "keywords": [
     "rehype",
@@ -44,8 +45,12 @@
     "dedent": "^0.7.0",
     "eslint": "^8.24.0",
     "rehype": "^12.0.1",
+    "rehype-stringify": "^10.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
     "rollup": "^2.79.1",
     "typescript": "^5.9.3",
+    "unified": "^11.0.5",
     "uvu": "^0.5.6",
     "uvu-watch": "^1.0.11"
   },

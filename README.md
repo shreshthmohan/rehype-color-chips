@@ -40,7 +40,7 @@ const serializedContent = await serialize(content, {
     remarkPlugins: [remarkGfm],
     rehypePlugins: [
       /* other rehype plugins */
-      [rehypeColorChips, { customClassName: 'color-chip' }],
+      [rehypeColorChips, { customClassName: 'color-chip', location: 'after' }],
     ],
   },
 })
@@ -78,6 +78,26 @@ Type: `string`
 Default: `'gfm-color-chip'`
 
 Adds a `class` to the added span element. Can be used to apply custom [styles](#styling) to the "color-chip".
+
+#### options.location
+
+Type: `"after" | "before"`
+Default: `"after"`
+
+Controls the position of the color chip relative to the color text.
+
+- `"after"` - Places the color chip after the color text (default behavior)
+- `"before"` - Places the color chip before the color text
+
+Example:
+
+```js
+// Color chip appears after the color text
+rehypeColorChips({ location: 'after' })
+
+// Color chip appears before the color text
+rehypeColorChips({ location: 'before' })
+```
 
 [rehype]: https://github.com/wooorm/rehype
 [supported color model]: https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#supported-color-models
