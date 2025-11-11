@@ -1,35 +1,34 @@
 import { visit } from 'unist-util-visit';
 import { toString } from 'hast-util-to-string';
 import { color } from 'd3-color';
-function plugin(options) {
-    if (options === void 0) { options = { customClassName: 'gfm-color-chip', location: 'after' }; }
-    return function (tree) {
+function plugin(options = { customClassName: 'gfm-color-chip', location: 'after' }) {
+    return (tree) => {
         var _a, _b;
-        var customClassName = (_a = options.customClassName) !== null && _a !== void 0 ? _a : 'gfm-color-chip';
-        var location = (_b = options.location) !== null && _b !== void 0 ? _b : 'after';
-        var nodesToModify = [];
+        const customClassName = (_a = options.customClassName) !== null && _a !== void 0 ? _a : 'gfm-color-chip';
+        const location = (_b = options.location) !== null && _b !== void 0 ? _b : 'after';
+        const nodesToModify = [];
         visit(tree, 'element', function (node, index, parent) {
             if (node.tagName === 'code' && node.properties) {
-                var value = toString(node);
-                var parsedColor = color(value);
+                const value = toString(node);
+                const parsedColor = color(value);
                 if (parsedColor && parent && typeof index === 'number') {
-                    nodesToModify.push({ node: node, index: index, parent: parent, colorValue: parsedColor.formatHex() });
+                    nodesToModify.push({ node, index, parent, colorValue: parsedColor.formatHex() });
                 }
             }
         });
-        for (var i = nodesToModify.length - 1; i >= 0; i--) {
-            var _c = nodesToModify[i], node = _c.node, index = _c.index, parent_1 = _c.parent, colorValue = _c.colorValue;
-            var newNode = {
+        for (let i = nodesToModify.length - 1; i >= 0; i--) {
+            const { node, index, parent, colorValue } = nodesToModify[i];
+            const newNode = {
                 type: 'element',
                 tagName: 'span',
                 properties: {
                     className: [customClassName],
-                    style: 'background-color: ' + colorValue + ';'
+                    style: 'background-color: ' + colorValue + ';',
                 },
-                children: []
+                children: [],
             };
             if (location === 'before') {
-                parent_1.children.splice(index, 0, newNode);
+                parent.children.splice(index, 0, newNode);
             }
             else {
                 node.children.push(newNode);

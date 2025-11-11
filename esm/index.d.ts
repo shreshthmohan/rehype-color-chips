@@ -3,6 +3,6 @@ interface Options {
     customClassName: string;
     location: Location;
 }
-declare type Location = "after" | "before";
+type Location = "after" | "before";
 declare function plugin(options?: Options): (tree: Root) => void;
 export default plugin;
