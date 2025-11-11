@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
-    "target": "ES3",
+    "target": "ES2015",
     "rootDir": "./src",
     "declaration": true,
     "module": "ES6",
     "strict": true,
     "outDir": "./esm",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "skipLibCheck": true
   },
   "include": ["src/**/*"]
 }
